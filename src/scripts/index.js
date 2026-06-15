@@ -16,7 +16,6 @@ import {
   deleteCard 
 } from "./components/api.js";
 
-
 // файл index.js
 import { enableValidation, clearValidation } from "./components/validation.js";
 
@@ -33,8 +32,7 @@ const validationSettings = {
 // включение валидации вызовом enableValidation
 enableValidation(validationSettings);
 
-import { initialCards } from "./cards.js";
-import { createCardElement, likeCard } from "./components/card.js";
+import { createCardElement, removeCardElement, updateLikeState } from "./components/card.js";
 import { openModalWindow, closeModalWindow, setCloseModalWindowEventListeners } from "./components/modal.js";
 
 // DOM элементы попапа удаления
@@ -135,8 +133,6 @@ const handleAvatarFromSubmit = (evt) => {
   });
 };
 
-
-
 const handleCardFormSubmit = (evt) => {
   evt.preventDefault();
   const submitButton = evt.submitter;
@@ -152,12 +148,12 @@ const handleCardFormSubmit = (evt) => {
           {
             currentUserId,
             onPreviewPicture: handlePreviewPicture,
-            onLikeClick: handlechangeLikeCardStatus,
+            onLikeClick: (likeButton, cardId, likeCounter, cardElement) => 
+              handlechangeLikeCardStatus(likeButton, cardId, likeCounter, cardElement, currentUserId),
             onDeleteClick: handleDeleteCard,
           }
         )
       );
-      cardForm.reset();  
       closeModalWindow(cardFormModalWindow);
     })
     .catch((err) => {
@@ -184,7 +180,7 @@ const handleConfirmDelete = (evt) => {
   
   deleteCard(cardToDeleteId)
     .then(() => {
-      cardToDeleteElement.remove();
+      removeCardElement(cardToDeleteElement);
       closeModalWindow(deleteConfirmPopup);
     })
     .catch((err) => {
@@ -198,20 +194,17 @@ const handleConfirmDelete = (evt) => {
 // Слушатель на форму подтверждения
 deleteConfirmForm.addEventListener("submit", handleConfirmDelete);
 
-const handlechangeLikeCardStatus = (likeButton, cardId, likeCounter) => {
+const handlechangeLikeCardStatus = (likeButton, cardId, likeCounter, cardElement, currentUserId) => {
   const isLiked = likeButton.classList.contains("card__like-button_is-active");
 
   changeLikeCardStatus(cardId, isLiked)
     .then((updatedCard) => {
-      likeButton.classList.toggle("card__like-button_is-active");
-      likeCounter.textContent = updatedCard.likes.length;
+      updateLikeState(cardElement, updatedCard);
     })
     .catch((err) => {
       console.log(err);
     });
 };
-
-
 
 const formatDate = (date) =>
   date.toLocaleDateString("ru-RU", {
@@ -323,7 +316,6 @@ openCardFormButton.addEventListener("click", () => {
   openModalWindow(cardFormModalWindow);
 });
 
-
 // настраиваем обработчики закрытия попапов
 const allPopups = document.querySelectorAll(".popup");
 allPopups.forEach((popup) => {
@@ -346,8 +338,9 @@ Promise.all([getCardList(), getUserInfo()])
         createCardElement(card, {
           currentUserId,
           onPreviewPicture: handlePreviewPicture,
-          onLikeClick: handlechangeLikeCardStatus, 
-          onDeleteClick: handleDeleteCard,           
+          onLikeClick: (likeButton, cardId, likeCounter, cardElement) => 
+          handlechangeLikeCardStatus(likeButton, cardId, likeCounter, cardElement, currentUserId),
+          onDeleteClick: handleDeleteCard,
         })
       );
     });

@@ -36,7 +36,7 @@ export const createCardElement = (
     likeButton.classList.add("card__like-button_is-active");
   }
   likeButton.addEventListener("click", () =>
-    onLikeClick(likeButton, data._id, likeCounter)
+    onLikeClick(likeButton, data._id, likeCounter, cardElement)
   );
   if (data.owner._id !== currentUserId) {
     deleteButton.remove();
@@ -46,4 +46,22 @@ export const createCardElement = (
     );
   }
   return cardElement;
+};
+
+export const removeCardElement = (cardElement) => {
+  cardElement.remove();
+};
+
+// Проверяет, есть ли лайк пользователя на карточке
+export const isCardLikedByUser = (card, userId) => {
+  return card.likes.some(like => like._id === userId);
+};
+
+// Обновляет состояние лайка на карточке
+export const updateLikeState = (cardElement, updatedCard) => {
+  const likeButton = cardElement.querySelector(".card__like-button");
+  const likeCounter = cardElement.querySelector(".card__like-count");
+  
+  likeButton.classList.toggle("card__like-button_is-active");
+  likeCounter.textContent = updatedCard.likes.length;
 };

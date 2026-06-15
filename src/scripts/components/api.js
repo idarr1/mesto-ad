@@ -62,15 +62,9 @@ export const deleteCard = (cardId) => {
   }).then(getResponseData);
 }
 
-
 export const changeLikeCardStatus = (cardID, isLiked) => {
   return fetch(`${config.baseUrl}/cards/likes/${cardID}`, {
     method: isLiked ?  "DELETE" : "PUT",
     headers: config.headers,
   }).then((res) => getResponseData(res));
-};
-
-export const updateLikeCount = (cardElement, likes) => {
-  const likeCountElement = cardElement.querySelector('.card__like-count');
-  likeCountElement.textContent = likes.length;
 };
