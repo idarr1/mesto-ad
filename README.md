@@ -43,4 +43,8 @@
 
 ---
 
+## Github
 https://github.com/idarr1/mesto-ad.git
+
+## Github Pages
+https://idarr1.github.io/mesto-ad/

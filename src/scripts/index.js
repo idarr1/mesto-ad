@@ -37,6 +37,15 @@ import { initialCards } from "./cards.js";
 import { createCardElement, likeCard } from "./components/card.js";
 import { openModalWindow, closeModalWindow, setCloseModalWindowEventListeners } from "./components/modal.js";
 
+// DOM элементы попапа удаления
+const deleteConfirmPopup = document.querySelector(".popup_type_remove-card");
+const deleteConfirmForm = deleteConfirmPopup.querySelector(".popup__form");
+const deleteConfirmButton = deleteConfirmPopup.querySelector(".popup__button");
+
+// Переменные для хранения карточки, которую хотим удалить
+let cardToDeleteElement = null;
+let cardToDeleteId = null;
+
 // DOM узлы
 const placesWrap = document.querySelector(".places__list");
 const profileFormModalWindow = document.querySelector(".popup_type_edit");
@@ -159,14 +168,35 @@ const handleCardFormSubmit = (evt) => {
     });
 };
 
-
+// Открывает попап подтверждения вместо прямого удаления
 const handleDeleteCard = (cardElement, cardId) => {
-  deleteCard(cardId) 
-    .then(() => {
-      cardElement.remove();
-    })
-    .catch(console.log);
+  cardToDeleteElement = cardElement;
+  cardToDeleteId = cardId;
+  openModalWindow(deleteConfirmPopup);
 };
+
+// Удаляет карточку после подтверждения
+const handleConfirmDelete = (evt) => {
+  evt.preventDefault();
+  
+  const originalText = deleteConfirmButton.textContent;
+  deleteConfirmButton.textContent = "Удаление...";
+  
+  deleteCard(cardToDeleteId)
+    .then(() => {
+      cardToDeleteElement.remove();
+      closeModalWindow(deleteConfirmPopup);
+    })
+    .catch((err) => {
+      console.log("Ошибка удаления:", err);
+    })
+    .finally(() => {
+      deleteConfirmButton.textContent = originalText;
+    });
+};
+
+// Слушатель на форму подтверждения
+deleteConfirmForm.addEventListener("submit", handleConfirmDelete);
 
 const handlechangeLikeCardStatus = (likeButton, cardId, likeCounter) => {
   const isLiked = likeButton.classList.contains("card__like-button_is-active");
